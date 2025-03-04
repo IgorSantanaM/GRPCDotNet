@@ -29,6 +29,7 @@ namespace GrpcDotNet.Services
         {
             for (var i = 0; i < 100; i++)
             {
+                if (context.CancellationToken.IsCancellationRequested) return;
                 var response = new Response() { Message = i.ToString() };
                 await responseStream.WriteAsync(response);
             }
