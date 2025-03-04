@@ -1,17 +1,34 @@
 global using static Basics.FirstServiceDefinition;
 using Basics;
+using Grpc.Net.Compression;
+using MVCClient.Interceptors;
+using System.IO.Compression;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
+
 // Add services to the container.
 services.AddControllersWithViews();
+services.AddTransient<ClientLoggerInteceptor>();
+services.AddTransient<ServerLoggingInteceptor>();
 
-services.AddGrpcClient<FirstServiceDefinition.FirstServiceDefinitionClient>(opt =>
+services.AddGrpcClient<FirstServiceDefinitionClient>(opt =>
 {
     opt.Address = new Uri("https://localhost:7057");
-}).EnableCallContextPropagation();
+}).AddInterceptor<ClientLoggerInteceptor>();
 
+
+services.AddGrpc(opt =>
+{
+    opt.Interceptors.Add<ServerLoggingInteceptor>();
+    opt.ResponseCompressionAlgorithm = "gzip";
+    opt.ResponseCompressionLevel = CompressionLevel.SmallestSize;
+    //opt.CompressionProviders = new List<ICompressionProvider>()
+    //{
+    //    new GzipCompressionProvider(CompressionLevel.SmallestSize);
+    //};
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

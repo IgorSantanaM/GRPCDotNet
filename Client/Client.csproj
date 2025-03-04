@@ -19,11 +19,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-	
-	<ItemGroup>
-		<Protobuf include="..\GrpcDotNet\Protos\first.proto" GrpcServices="Client">
-			<Link>Protos\first.proto</Link>
-		</Protobuf>
-	</ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\GrpcDotNet\Protos\first.proto" GrpcServices="Client">
+      <Link>Protos\first.proto</Link>
+    </Protobuf>
+  </ItemGroup>
 	
 </Project>
