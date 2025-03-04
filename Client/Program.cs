@@ -1,13 +1,36 @@
 ﻿using Basics;
+using Grpc.Core;
 using Grpc.Net.Client;
+using Grpc.Net.Client.Balancer;
+using Grpc.Net.Client.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 
-var option = new GrpcChannelOptions
+
+var factory = new StaticResolverFactory(addr => new[]
 {
-    
-};
-using var channel = GrpcChannel.ForAddress("https://localhost:7057", option);
+    new BalancerAddress("localhost", 5057),
+    new BalancerAddress("localhost", 5058)
+});
+
+var services = new ServiceCollection();
+services.AddSingleton<ResolverFactory>(factory);
+
+//var options = new GrpcChannelOptions
+//{
+//};
+var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOptions()
+{
+    Credentials = ChannelCredentials.Insecure,
+    ServiceConfig =  new ServiceConfig
+    {
+        LoadBalancingConfigs = {new RoundRobinConfig()}
+    },
+    ServiceProvider = services.BuildServiceProvider()
+});
+//using var channel = GrpcChannel.ForAddress("https://localhost:7057", options);
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 //Unary(client);
 //ClientStreaming(client);
@@ -16,8 +39,9 @@ BiDirectionalStreaming(client);
 
 void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
 {
+    var metadata = new Metadata { { "grpc-accept-enconding", "gzip" } };
     var request = new Request { Content = "Hello" };
-    var response = client.Unary(request, deadline: DateTime.UtcNow.AddMilliseconds();
+    var response = client.Unary(request, deadline: DateTime.UtcNow.AddMilliseconds(3), headers: metadata);
 }
 
 async void ClientStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
@@ -28,7 +52,7 @@ async void ClientStreaming(FirstServiceDefinition.FirstServiceDefinitionClient c
         await call.RequestStream.WriteAsync(new Request { Content = i.ToString()});
 
     }
-    await call.RequestStream.CloseAsync();
+    await call.RequestStream.CompleteAsync();
 
     Response response = await call;
 }
@@ -47,9 +71,11 @@ void ServerStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
                 cancellationToken.Cancel();
             }
         }
+    } catch (Exception ex) when (ex.InnerException != null)
+    {
+        Console.WriteLine(ex);
     }
-
-
+    }
 }
 
 async void BiDirectionalStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
@@ -69,6 +95,6 @@ async void BiDirectionalStreaming(FirstServiceDefinition.FirstServiceDefinitionC
             Console.WriteLine(message);
         } 
 
-        await call.ResponseStream.CompleteAsync();
+        await call.ResponseStream.Compre;
     }
 }
