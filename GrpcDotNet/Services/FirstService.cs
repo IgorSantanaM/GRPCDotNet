@@ -4,7 +4,7 @@ using Grpc.Core;
 
 namespace GrpcDotNet.Services
 {
-    public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase
+    public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase, IFirstService
     {
         public override Task<Response> Unary(Request request, ServerCallContext context)
         {
@@ -15,14 +15,14 @@ namespace GrpcDotNet.Services
             }
 
             //context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
-            var response = new Response() { Message = request.Content + $"from server {context.Host}"};
+            var response = new Response() { Message = request.Content + $"from server {context.Host}" };
 
             return Task.FromResult(response);
         }
 
         public override async Task<Response> ClientStream(IAsyncStreamReader<Request> requestStream, ServerCallContext context)
         {
-            Response response = new Response() { Message = "I got"};
+            Response response = new Response() { Message = "I got" };
             while (await requestStream.MoveNext())
             {
                 var requestPayload = requestStream.Current;
