@@ -8,7 +8,13 @@ namespace GrpcDotNet.Services
     {
         public override Task<Response> Unary(Request request, ServerCallContext context)
         {
-            context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
+
+            if (!context.RequestHeaders.Where(x => x.Key == "grpc-previous-rpc-attemps").Any())
+            {
+                throw new RpcException(new Status(StatusCode.Internal, "Not here: try again"));
+            }
+
+            //context.WriteOptions = new WriteOptions(WriteFlags.NoCompress);
             var response = new Response() { Message = request.Content + $"from server {context.Host}"};
 
             return Task.FromResult(response);
