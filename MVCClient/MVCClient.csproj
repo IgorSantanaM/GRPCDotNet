@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Auth\Auth.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="..\GrpcDotNet\Protos\first.proto" GrpcServices="Client">
       <Link>Protos\first.proto</Link>
     </Protobuf>
