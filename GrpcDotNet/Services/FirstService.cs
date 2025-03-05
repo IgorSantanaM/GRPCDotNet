@@ -1,11 +1,13 @@
 ﻿
 using Basics;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GrpcDotNet.Services
 {
     public class FirstService : FirstServiceDefinition.FirstServiceDefinitionBase, IFirstService
     {
+        [Authorize]
         public override Task<Response> Unary(Request request, ServerCallContext context)
         {
 

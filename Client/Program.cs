@@ -1,5 +1,6 @@
 ﻿using Basics;
 using Grpc.Core;
+using Grpc.Health.V1;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Balancer;
 using Grpc.Net.Client.Configuration;
@@ -57,6 +58,12 @@ var channel = GrpcChannel.ForAddress("static://localhost", new GrpcChannelOption
     },
     ServiceProvider = services.BuildServiceProvider()
 });
+
+var healthClient = new Health.HealthClient(channel);
+
+var healthResult = await healthClient.CheckAsync(new HealthCheckRequest());
+
+Console.WriteLine($"Health result: {healthResult.Status}");
 //using var channel = GrpcChannel.ForAddress("https://localhost:7057", options);
 var client = new FirstServiceDefinition.FirstServiceDefinitionClient(channel);
 Unary(client);
@@ -103,7 +110,6 @@ void ServerStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)
     {
         Console.WriteLine(ex);
     }
-}
 }
 
 async void BiDirectionalStreaming(FirstServiceDefinition.FirstServiceDefinitionClient client)

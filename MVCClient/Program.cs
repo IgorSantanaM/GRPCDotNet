@@ -1,4 +1,5 @@
 global using static Basics.FirstServiceDefinition;
+using Auth;
 using Basics;
 using Grpc.Net.Compression;
 using MVCClient.Interceptors;
@@ -16,7 +17,17 @@ services.AddTransient<ServerLoggingInteceptor>();
 services.AddGrpcClient<FirstServiceDefinitionClient>(opt =>
 {
     opt.Address = new Uri("https://localhost:7057");
-}).AddInterceptor<ClientLoggerInteceptor>();
+})
+    .AddCallCredentials((context, metadata) =>
+    {
+        var token = JwtHelper.GenerateJwtToken("MVC");
+        if (!string.IsNullOrEmpty(token))
+        {
+            metadata.Add("Authorization", $"Bearer {token}");
+        }
+        return Task.CompletedTask;
+    })
+    .AddInterceptor<ClientLoggerInteceptor>();
 
 
 services.AddGrpc(opt =>
