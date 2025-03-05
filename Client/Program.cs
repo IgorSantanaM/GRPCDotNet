@@ -18,6 +18,17 @@ var retryPolicy = new MethodConfig
     }
 };
 
+var hedging = new MethodConfig
+{
+    Names = { MethodName.Default },
+    HedgingPolicy = new HedgingPolicy
+    {
+        MaxAttempts = 5,
+        NonFatalStatusCodes = { StatusCode.Internal },
+        HedgingDelay = TimeSpan.FromSeconds(0.5)
+    }
+};
+
 var factory = new StaticResolverFactory(addr => new[]
 {
     new BalancerAddress("localhost", 5057),
@@ -31,7 +42,8 @@ var options = new GrpcChannelOptions
 {
     ServiceConfig = new ServiceConfig
     {
-        MethodConfigs = {retryPolicy}
+        //MethodConfigs = {retryPolicy}
+        MethodConfigs = {hedging}
     }
 };
 
@@ -51,7 +63,6 @@ Unary(client);
 //ClientStreaming(client);
 //ServerStreaming(client);
 //BiDirectionalStreaming(client);
-
 
 void Unary(FirstServiceDefinition.FirstServiceDefinitionClient client)
 {
