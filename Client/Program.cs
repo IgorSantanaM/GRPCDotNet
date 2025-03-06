@@ -4,12 +4,28 @@ using Grpc.Health.V1;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Balancer;
 using Grpc.Net.Client.Configuration;
+using Grpc.Reflection.V1Alpha;
 using Microsoft.Extensions.DependencyInjection;
+using ServerReflectionClient = Grpc.Reflection.V1Alpha.ServerReflection.ServerReflectionClient;
+
+using var channelReflect = GrpcChannel.ForAddress("https://localhost:5057");
+var client = new ServerReflectionClient(channelReflect);
+
+ServerReflectionRequest request = new ServerReflectionRequest() { ListServices = ""};
+
+using var call = client.ServerReflectionInfo();
+await call.RequestStream.WriteAsync(request);
+await call.RequestStream.CompleteAsync();
 
 
+while (await call.ResponseStream.MoveNext())
+{
+    var response = call.ResponseStream.Current;
+    foreach (var item in response.ListServicesResponse.Service)
+        Console.WriteLine("- " + item.Name);
+}
 
 
-using var channel = GrpcChannel.ForAddress(" ")
 var retryPolicy = new MethodConfig
 {
     Names = { MethodName.Default },
