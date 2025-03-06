@@ -6,6 +6,10 @@ using Grpc.Net.Client.Balancer;
 using Grpc.Net.Client.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+
+
+
+using var channel = GrpcChannel.ForAddress(" ")
 var retryPolicy = new MethodConfig
 {
     Names = { MethodName.Default },
