@@ -7,11 +7,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
-
-services.AddGrpc(opt =>
-{
-});
-
+    
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt => opt.TokenValidationParameters= new TokenValidationParameters
     {
@@ -21,6 +17,8 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         ValidateLifetime = false,
         IssuerSigningKey = JwtHelper.SecurityKey
     });
+
+services.AddGrpcReflection();
 
 services.AddAuthorization(opt => opt.AddPolicy(JwtBearerDefaults.AuthenticationScheme, p =>
 {
@@ -37,6 +35,7 @@ var app = builder.Build();
 app.MapGrpcService<GreeterService>();
 app.MapGrpcService<FirstService>();
 app.MapGrpcHealthChecksService();
+app.MapGrpcReflectionService();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 
 app.Run();
